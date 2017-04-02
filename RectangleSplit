@@ -1,0 +1,184 @@
+import java.io.FileInputStream;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        try {
+            Scanner input = new Scanner(new FileInputStream("0903/src/testCase.txt"));
+            //Scanner input = new Scanner(System.in);
+            int m = input.nextInt();
+            int n = input.nextInt();
+            input.nextLine();
+            char[][] array = new char[m][n];
+            for (int i = 0; i < m; i++) {
+                array[i] = input.nextLine().toCharArray();
+            }
+            Soluted soluted = new Soluted(array);
+            System.out.print(soluted.split(array));
+            /*Soluted soluted = new Soluted();
+            System.out.print(soluted.computeDistance(array));*/
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+}
+class Soluted{
+    int[] dx = {-1, 1, 0, 0};
+    int[] dy = {0, 0, -1, 1};
+    int result = 0;
+    int m;
+    int n;
+    char[][] array;
+    int[][][] dp;
+    public Soluted(char[][] array){
+        this.array = array;
+        this.m = array.length;
+        this.n = array[0].length;
+        this.dp = new int[array.length][array[0].length][2];
+    }
+    public int split(char[][] array) {
+        //int[][][] dp = new int[m][n][2];
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if(dp[i][j][0] == 0) {
+                    result++;
+                    bfs(i, j, 0);
+                }
+                if(dp[i][j][1] == 0) {
+                    result++;
+                    bfs(i, j, 1);
+                }
+            }
+        }
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                System.out.print(dp[i][j][0] + "" + (char)array[i][j] + "" + dp[i][j][1] + " ");
+            }
+            System.out.println("");
+        }
+        return result;
+    }
+    private void bfs(int col, int row, int height){
+        if(dp[col][row][height] != 0)
+            return;
+        System.out.println(col + " " + row + " " + height);
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                System.out.print(dp[i][j][0] + "" + (char)array[i][j] + "" + dp[i][j][1] + " ");
+            }
+            System.out.println("");
+        }
+        System.out.println("");
+        char current = array[col][row];
+        if (current == ' '){
+            dp[col][row][0] = result;
+            dp[col][row][1] = result;
+            for (int i = 0; i < dx.length; i++) {
+                int tempx = col + dx[i];
+                int tempy = row + dy[i];
+                if(tempx >= 0 && tempx < m && tempy >= 0 && tempy < n){
+                    if (array[tempx][tempy] == ' '){
+                        bfs(tempx, tempy, 0);
+                    }
+                    if (array[tempx][tempy] == '/'){
+                        if(i == 0 || i == 2)
+                            bfs(tempx, tempy, 1);
+                        else
+                            bfs(tempx, tempy, 0);
+                    }
+                    if (array[tempx][tempy] == '\\'){
+                        if(i == 0 || i == 3)
+                            bfs(tempx, tempy, 0);
+                        else
+                            bfs(tempx, tempy, 1);
+                    }
+                }
+            }
+        }
+        if (current == '/'){
+            dp[col][row][height] = result;
+            if (height == 0) {
+                for (int i = 0; i < dx.length; i += 2) {
+                    int tempx = col + dx[i];
+                    int tempy = row + dy[i];
+                    if (tempx >= 0 && tempx < m && tempy >= 0 && tempy < n) {
+                        if (array[tempx][tempy] == ' ') {
+                            bfs(tempx, tempy, 0);
+                        }
+                        if (array[tempx][tempy] == '/') {
+                            bfs(tempx, tempy, 1);
+                        }
+                        if (array[tempx][tempy] == '\\') {
+                            if (i == 0)
+                                bfs(tempx, tempy, 0);
+                            else
+                                bfs(tempx, tempy, 1);
+                        }
+                    }
+                }
+            }else{
+                for (int i = 1; i < dx.length; i += 2) {
+                    int tempx = col + dx[i];
+                    int tempy = row + dy[i];
+                    if (tempx >= 0 && tempx < m && tempy >= 0 && tempy < n) {
+                        if (array[tempx][tempy] == ' ') {
+                            bfs(tempx, tempy, 0);
+                        }
+                        if (array[tempx][tempy] == '/') {
+                            bfs(tempx, tempy, 0);
+                        }
+                        if (array[tempx][tempy] == '\\') {
+                            if (i == 1)
+                                bfs(tempx, tempy, 1);
+                            else
+                                bfs(tempx, tempy, 0);
+                        }
+                    }
+                }
+            }
+        }
+        if (current == '\\'){
+            dp[col][row][height] = result;
+            if (height == 0) {
+                for (int i = 1; i <= 2; i++) {
+                    int tempx = col + dx[i];
+                    int tempy = row + dy[i];
+                    if (tempx >= 0 && tempx < m && tempy >= 0 && tempy < n) {
+                        if (array[tempx][tempy] == ' ') {
+                            bfs(tempx, tempy, 0);
+                        }
+                        if (array[tempx][tempy] == '/') {
+                            if (i == 1)
+                                bfs(tempx, tempy, 0);
+                            else
+                                bfs(tempx, tempy, 1);
+                        }
+                        if (array[tempx][tempy] == '\\') {
+                            bfs(tempx, tempy, 1);
+                        }
+                    }
+                }
+            }else{
+                for (int i = 0; i < dx.length; i += 3) {
+                    int tempx = col + dx[i];
+                    int tempy = row + dy[i];
+                    if (tempx >= 0 && tempx < m && tempy >= 0 && tempy < n) {
+                        if (array[tempx][tempy] == ' ') {
+                            bfs(tempx, tempy, 0);
+                        }
+                        if (array[tempx][tempy] == '/') {
+                            if (i == 0)
+                                bfs(tempx, tempy, 1);
+                            else
+                                bfs(tempx, tempy, 0);
+                        }
+                        if (array[tempx][tempy] == '\\') {
+                            bfs(tempx, tempy, 0);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
